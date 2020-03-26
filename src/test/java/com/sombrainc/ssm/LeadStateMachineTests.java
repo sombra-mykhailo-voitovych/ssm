@@ -21,7 +21,7 @@ class LeadStateMachineTests {
 	private StateMachine<LeadStates, LeadEvents> stateMachine;
 
 	@Test
-	void when3FailedEngageAttempts_thenVerifyIsDead() throws Exception {
+	void whenNewAssignCancel3Times_thenVerifyIsDead() throws Exception {
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 				.defaultAwaitTime(10)
@@ -37,12 +37,15 @@ class LeadStateMachineTests {
 				.and()
 				.step()
 				.sendEvent(LeadEvents.CANCEL)
-				.sendEvent(LeadEvents.CANCEL)
-				.sendEvent(LeadEvents.CANCEL)
-				.sendEvent(LeadEvents.CANCEL)
 				.expectStateChanged(1)
+				.expectState(LeadStates.CANCELLED)
+				.and()
+				.step()
+				.sendEvent(LeadEvents.CANCEL)
+				.sendEvent(LeadEvents.CANCEL)
+				.sendEvent(LeadEvents.CANCEL)
+				.expectStateChanged(3)
 				.expectState(LeadStates.DEAD)
-
 				.and()
 				.build();
 
@@ -51,7 +54,7 @@ class LeadStateMachineTests {
 
 
 	@Test
-	void whenCorrectFlow_thenVerifyIsSold() throws Exception {
+	void whenNewAssignSell_thenVerifyIsSold() throws Exception {
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -116,7 +119,7 @@ class LeadStateMachineTests {
 	}
 
 	@Test
-	void whenNewAssignAndUnassign_thenVerifyIsNew() throws Exception {
+	void whenNewAssignUnassign_thenVerifyIsNew() throws Exception {
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -133,6 +136,61 @@ class LeadStateMachineTests {
 						.step()
 						.sendEvent(LeadEvents.UNASSIGN)
 						.expectState(LeadStates.NEW)
+						.expectStateChanged(1)
+						.and()
+						.build();
+
+		testScenario.test();
+	}
+
+	@Test
+	void whenNewAssignCancel_thenVerifyIsCancelled() throws Exception {
+		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
+				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
+						.defaultAwaitTime(10)
+						.stateMachine(stateMachine)
+						.step()
+						.expectState(LeadStates.NEW)
+						.expectStateChanged(0)
+						.and()
+						.step()
+						.sendEvent(LeadEvents.ASSIGN)
+						.expectState(LeadStates.ASSIGNED)
+						.expectStateChanged(1)
+						.and()
+						.step()
+						.sendEvent(LeadEvents.CANCEL)
+						.expectState(LeadStates.CANCELLED)
+						.expectStateChanged(1)
+						.and()
+						.build();
+
+		testScenario.test();
+	}
+
+	@Test
+	void whenNewAssignCancelAssign_thenVerifyIsAssigned() throws Exception {
+		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
+				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
+						.defaultAwaitTime(10)
+						.stateMachine(stateMachine)
+						.step()
+						.expectState(LeadStates.NEW)
+						.expectStateChanged(0)
+						.and()
+						.step()
+						.sendEvent(LeadEvents.ASSIGN)
+						.expectState(LeadStates.ASSIGNED)
+						.expectStateChanged(1)
+						.and()
+						.step()
+						.sendEvent(LeadEvents.CANCEL)
+						.expectState(LeadStates.CANCELLED)
+						.expectStateChanged(1)
+						.and()
+						.step()
+						.sendEvent(LeadEvents.ASSIGN)
+						.expectState(LeadStates.ASSIGNED)
 						.expectStateChanged(1)
 						.and()
 						.build();

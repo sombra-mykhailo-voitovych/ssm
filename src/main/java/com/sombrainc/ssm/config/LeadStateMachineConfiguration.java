@@ -34,7 +34,7 @@ public class LeadStateMachineConfiguration extends
         states.
                 withStates()
                 .initial(LeadStates.NEW)
-                .choice(LeadStates.CANCELLED)
+                .choice(LeadStates.CANCELLED_CHOICE)
                 .states(EnumSet.allOf(LeadStates.class));
     }
 
@@ -52,11 +52,13 @@ public class LeadStateMachineConfiguration extends
                 .withExternal().source(LeadStates.NEW).target(LeadStates.ASSIGNED).event(LeadEvents.ASSIGN)
                 .and().withExternal().source(LeadStates.NEW).target(LeadStates.DEAD).event(LeadEvents.GO_AWAY)
                 .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.NEW).event(LeadEvents.UNASSIGN)
-                .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.CANCELLED).event(LeadEvents.CANCEL).action(increaseFailedEngageAttemptsAction)
+                .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.CANCELLED).event(LeadEvents.CANCEL)
                 .and().withExternal().source(LeadStates.CANCELLED).target(LeadStates.ASSIGNED).event(LeadEvents.ASSIGN)
+                .and().withExternal().source(LeadStates.CANCELLED).target(LeadStates.CANCELLED_CHOICE)
+                .event(LeadEvents.CANCEL).action(increaseFailedEngageAttemptsAction)
                 .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.SOLD).event(LeadEvents.SELL)
-                .and().withChoice().source(LeadStates.CANCELLED)
+                .and().withChoice().source(LeadStates.CANCELLED_CHOICE)
                 .first(LeadStates.DEAD, failedAttemptsGuard)
-                .last(LeadStates.CANCELLED, increaseFailedEngageAttemptsAction);
+                .last(LeadStates.CANCELLED);
     }
 }
