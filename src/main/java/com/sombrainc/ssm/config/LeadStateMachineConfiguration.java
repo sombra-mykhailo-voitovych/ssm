@@ -23,28 +23,11 @@ public class LeadStateMachineConfiguration extends
     @Autowired
     private FailedAttemptsGuard failedAttemptsGuard;
 
-//    @Bean
-//    public FailedAttemptsGuard getFailedAttemptsGuard(){
-//        return new FailedAttemptsGuard();
-//    }
-
-
-
     @Autowired
     private IncreaseFailedEngageAttemptsAction increaseFailedEngageAttemptsAction;
 
-//    @Bean
-//    public IncreaseFailedEngageAttemptsAction getIncreaseFailedEngageAttemptsAction(){
-//        return new IncreaseFailedEngageAttemptsAction();
-//    }
-
     @Autowired
     private CustomStateMachineListener stateMachineListener;
-
-//    @Bean
-//    public CustomStateMachineListener getStateMachineListener(){
-//        return new CustomStateMachineListener();
-//    }
 
     @Override public void configure(StateMachineStateConfigurer<LeadStates, LeadEvents> states)
             throws Exception {
