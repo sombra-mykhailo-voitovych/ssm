@@ -5,7 +5,7 @@ import com.sombrainc.ssm.events.LeadEvents;
 import com.sombrainc.ssm.guards.FailedAttemptsGuard;
 import com.sombrainc.ssm.listeners.CustomStateMachineListener;
 import com.sombrainc.ssm.states.LeadStates;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
@@ -20,42 +20,38 @@ import java.util.EnumSet;
 public class LeadStateMachineConfiguration extends
         EnumStateMachineConfigurerAdapter<LeadStates, LeadEvents> {
 
-//    @Autowired
-//    private FailedAttemptsGuard failedAttemptsGuard;
+    @Autowired
+    private FailedAttemptsGuard failedAttemptsGuard;
 
-    @Bean
-    public FailedAttemptsGuard getFailedAttemptsGuard(){
-        return new FailedAttemptsGuard();
-    }
+//    @Bean
+//    public FailedAttemptsGuard getFailedAttemptsGuard(){
+//        return new FailedAttemptsGuard();
+//    }
 
 
 
-//    @Autowired
-//    private IncreaseFailedEngageAttemptsAction increaseFailedEngageAttemptsAction;
+    @Autowired
+    private IncreaseFailedEngageAttemptsAction increaseFailedEngageAttemptsAction;
 
-    @Bean
-    public IncreaseFailedEngageAttemptsAction getIncreaseFailedEngageAttemptsAction(){
-        return new IncreaseFailedEngageAttemptsAction();
-    }
+//    @Bean
+//    public IncreaseFailedEngageAttemptsAction getIncreaseFailedEngageAttemptsAction(){
+//        return new IncreaseFailedEngageAttemptsAction();
+//    }
 
-//    @Autowired
-//    private CustomStateMachineListener stateMachineListener;
+    @Autowired
+    private CustomStateMachineListener stateMachineListener;
 
-    @Bean
-    public CustomStateMachineListener getStateMachineListener(){
-        return new CustomStateMachineListener();
-    }
+//    @Bean
+//    public CustomStateMachineListener getStateMachineListener(){
+//        return new CustomStateMachineListener();
+//    }
 
     @Override public void configure(StateMachineStateConfigurer<LeadStates, LeadEvents> states)
             throws Exception {
         states.
                 withStates()
                 .initial(LeadStates.NEW)
-//                .exit(LeadStates.DEAD)
-//                .end(LeadStates.SOLD)
-//                .choice(LeadStates.CANCELLED)
-//                .stateDo(LeadStates.CANCELLED, getIncreaseFailedEngageAttemptsAction())
-//                .state(LeadStates.CANCELLED, getIncreaseFailedEngageAttemptsAction())
+                .choice(LeadStates.CANCELLED)
                 .states(EnumSet.allOf(LeadStates.class));
     }
 
@@ -64,7 +60,7 @@ public class LeadStateMachineConfiguration extends
         config
                 .withConfiguration()
                 .autoStartup(true)
-                .listener(getStateMachineListener());
+                .listener(stateMachineListener);
     }
 
     @Override public void configure(
@@ -73,13 +69,11 @@ public class LeadStateMachineConfiguration extends
                 .withExternal().source(LeadStates.NEW).target(LeadStates.ASSIGNED).event(LeadEvents.ASSIGN)
                 .and().withExternal().source(LeadStates.NEW).target(LeadStates.DEAD).event(LeadEvents.GO_AWAY)
                 .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.NEW).event(LeadEvents.UNASSIGN)
-                .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.CANCELLED).event(LeadEvents.CANCEL)
+                .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.CANCELLED).event(LeadEvents.CANCEL).action(increaseFailedEngageAttemptsAction)
                 .and().withExternal().source(LeadStates.CANCELLED).target(LeadStates.ASSIGNED).event(LeadEvents.ASSIGN)
                 .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.SOLD).event(LeadEvents.SELL)
-//                .and().withChoice().source(LeadStates.CANCELLED).first(LeadStates.CANCELLED, getFailedAttemptsGuard()).last(LeadStates.DEAD);
-                .and().withExternal().source(LeadStates.CANCELLED).target(LeadStates.DEAD).event(LeadEvents.CANCEL).guard(getFailedAttemptsGuard())
-//                /*.action(getIncreaseFailedEngageAttemptsAction())*/.guard(getFailedAttemptsGuard())
-//
-                .and().withInternal().source(LeadStates.CANCELLED).action(getIncreaseFailedEngageAttemptsAction());
+                .and().withChoice().source(LeadStates.CANCELLED)
+                .first(LeadStates.DEAD, failedAttemptsGuard)
+                .last(LeadStates.CANCELLED, increaseFailedEngageAttemptsAction);
     }
 }
