@@ -99,6 +99,27 @@ class LeadStateMachineTests {
 	}
 
 	@Test
+	void whenNewSell_thenVerifyEventNotAccepted() throws Exception {
+		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
+				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
+						.defaultAwaitTime(10)
+						.stateMachine(stateMachine)
+						.step()
+						.expectState(LeadStates.NEW)
+						.expectStateChanged(0)
+						.and()
+						.step()
+						.sendEvent(LeadEvents.SELL)
+						.expectState(LeadStates.NEW)
+						.expectStateChanged(0)
+						.expectEventNotAccepted(1)
+						.and()
+						.build();
+
+		testScenario.test();
+	}
+
+	@Test
 	void whenNewAssign_thenVerifyIsAssigned() throws Exception {
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
