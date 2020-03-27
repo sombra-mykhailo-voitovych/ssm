@@ -1,7 +1,6 @@
 package com.sombrainc.ssm;
 
 import com.sombrainc.ssm.events.LeadEvents;
-import com.sombrainc.ssm.persister.LeadStateMachinePersister;
 import com.sombrainc.ssm.service.LeadService;
 import com.sombrainc.ssm.states.LeadStates;
 import org.junit.Test;
@@ -23,29 +22,22 @@ public class LeadServiceTest {
     private StateMachine<LeadStates, LeadEvents> stateMachine;
 
     @Autowired
-    private LeadStateMachinePersister leadStateMachinePersister;
-
-    @Autowired
     private LeadService leadService;
 
     @Test
     public void whenAssignSell_thenReturnSoldFromPersister(){
-        final String leadId = (String) stateMachine.getExtendedState().getVariables().get("lead_id");
+
+        assertEquals(stateMachine.getState().getId(), LeadStates.NEW);
 
         leadService.updateLeadStateByEvent(LeadEvents.ASSIGN);
         leadService.updateLeadStateByEvent(LeadEvents.SELL);
 
-        final StateMachine<LeadStates, LeadEvents> stateMachineStored =
-                leadStateMachinePersister.restore(stateMachine, leadId);
-        assertEquals(stateMachineStored.getState().getId(), LeadStates.SOLD);
+        assertEquals(stateMachine.getState().getId(), LeadStates.SOLD);
     }
 
     @Test
     public void whenNoActionPerformed_thenReturnNewFromPersister(){
-        final String leadId = (String) stateMachine.getExtendedState().getVariables().get("lead_id");
-        final StateMachine<LeadStates, LeadEvents> stateMachineStored =
-                leadStateMachinePersister.restore(stateMachine, leadId);
-        assertEquals(stateMachineStored.getState().getId(), LeadStates.NEW);
+        assertEquals(stateMachine.getState().getId(), LeadStates.NEW);
     }
 
 }
