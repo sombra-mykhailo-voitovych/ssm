@@ -4,19 +4,23 @@ import com.sombrainc.ssm.actions.IncreaseFailedEngageAttemptsAction;
 import com.sombrainc.ssm.events.LeadEvents;
 import com.sombrainc.ssm.guards.FailedAttemptsGuard;
 import com.sombrainc.ssm.listeners.CustomStateMachineListener;
+import com.sombrainc.ssm.persister.StateMachineContextPersister;
 import com.sombrainc.ssm.states.LeadStates;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.config.EnableStateMachine;
+import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import org.springframework.statemachine.persist.DefaultStateMachinePersister;
+import org.springframework.statemachine.persist.StateMachinePersister;
 
 import java.util.EnumSet;
 
 @Configuration
-@EnableStateMachine
+@EnableStateMachineFactory
 public class LeadStateMachineConfiguration extends
         EnumStateMachineConfigurerAdapter<LeadStates, LeadEvents> {
 
@@ -60,5 +64,10 @@ public class LeadStateMachineConfiguration extends
                 .and().withChoice().source(LeadStates.CANCELLED_CHOICE)
                 .first(LeadStates.DEAD, failedAttemptsGuard)
                 .last(LeadStates.CANCELLED);
+    }
+
+    @Bean
+    public StateMachinePersister<LeadStates, LeadEvents, String> persister() {
+        return new DefaultStateMachinePersister<>(new StateMachineContextPersister());
     }
 }

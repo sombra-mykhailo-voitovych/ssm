@@ -4,6 +4,8 @@ import com.sombrainc.ssm.events.LeadEvents;
 import com.sombrainc.ssm.states.LeadStates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.config.StateMachineFactory;
+import org.springframework.statemachine.persist.StateMachinePersister;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,18 +16,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeadService {
 
-    private final StateMachine<LeadStates, LeadEvents> stateMachine;
+    private final StateMachinePersister<LeadStates, LeadEvents, String> stateMachinePersister;
+    private final StateMachineFactory<LeadStates, LeadEvents> stateMachineFactory;
 
     @Autowired
     public LeadService(
-            StateMachine<LeadStates, LeadEvents> stateMachine) {
-        this.stateMachine = stateMachine;
+            StateMachinePersister stateMachinePersister,
+            StateMachineFactory<LeadStates, LeadEvents> stateMachineFactory) {
+        this.stateMachinePersister = stateMachinePersister;
+        this.stateMachineFactory = stateMachineFactory;
     }
 
-    public void updateLeadStateByEvent(LeadEvents event){
+    public void updateLeadStateByEvent(LeadEvents event, String leadId) throws Exception {
+        final StateMachine<LeadStates, LeadEvents> someStateMachine =
+                stateMachineFactory.getStateMachine();
+        final StateMachine<LeadStates, LeadEvents> stateMachine =
+                stateMachinePersister.restore(someStateMachine, leadId);
         final boolean eventResult = stateMachine.sendEvent(event);
-        if (!eventResult){
-            throw new RuntimeException(String.format("event %s is not accepted", event));
+        if(eventResult){
+            stateMachinePersister.persist(stateMachine, leadId);
         }
     }
 

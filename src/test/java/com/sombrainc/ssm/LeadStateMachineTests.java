@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.test.StateMachineTestPlan;
 import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -14,14 +15,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class LeadStateMachineTests {
 
 	@Autowired
-	private StateMachine<LeadStates, LeadEvents> stateMachine;
+	private StateMachineFactory<LeadStates, LeadEvents> stateMachineFactory;
 
 	@Test
 	void whenNewAssignCancel3Times_thenVerifyIsDead() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 				.defaultAwaitTime(10)
@@ -55,6 +57,8 @@ class LeadStateMachineTests {
 
 	@Test
 	void whenNewAssignSell_thenVerifyIsSold() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -80,6 +84,8 @@ class LeadStateMachineTests {
 
 	@Test
 	void whenNewGoAway_thenVerifyIsDead() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -100,6 +106,8 @@ class LeadStateMachineTests {
 
 	@Test
 	void whenNewSell_thenVerifyEventNotAccepted() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -121,6 +129,8 @@ class LeadStateMachineTests {
 
 	@Test
 	void whenNewAssign_thenVerifyIsAssigned() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -141,6 +151,8 @@ class LeadStateMachineTests {
 
 	@Test
 	void whenNewAssignUnassign_thenVerifyIsNew() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -166,6 +178,8 @@ class LeadStateMachineTests {
 
 	@Test
 	void whenNewAssignCancel_thenVerifyIsCancelled() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
@@ -191,6 +205,8 @@ class LeadStateMachineTests {
 
 	@Test
 	void whenNewAssignCancelAssign_thenVerifyIsAssigned() throws Exception {
+		final StateMachine<LeadStates, LeadEvents> stateMachine =
+				stateMachineFactory.getStateMachine();
 		final StateMachineTestPlan<LeadStates, LeadEvents> testScenario =
 				StateMachineTestPlanBuilder.<LeadStates, LeadEvents>builder()
 						.defaultAwaitTime(10)
