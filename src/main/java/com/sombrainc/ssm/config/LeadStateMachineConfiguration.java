@@ -6,7 +6,6 @@ import com.sombrainc.ssm.guards.FailedAttemptsGuard;
 import com.sombrainc.ssm.listeners.CustomStateMachineListener;
 import com.sombrainc.ssm.persister.StateMachineContextPersister;
 import com.sombrainc.ssm.states.LeadStates;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
@@ -24,15 +23,6 @@ import java.util.EnumSet;
 public class LeadStateMachineConfiguration extends
         EnumStateMachineConfigurerAdapter<LeadStates, LeadEvents> {
 
-    @Autowired
-    private FailedAttemptsGuard failedAttemptsGuard;
-
-    @Autowired
-    private IncreaseFailedEngageAttemptsAction increaseFailedEngageAttemptsAction;
-
-    @Autowired
-    private CustomStateMachineListener stateMachineListener;
-
     @Override public void configure(StateMachineStateConfigurer<LeadStates, LeadEvents> states)
             throws Exception {
         states.
@@ -47,7 +37,7 @@ public class LeadStateMachineConfiguration extends
         config
                 .withConfiguration()
                 .autoStartup(true)
-                .listener(stateMachineListener);
+                .listener(new CustomStateMachineListener());
     }
 
     @Override public void configure(
@@ -59,10 +49,10 @@ public class LeadStateMachineConfiguration extends
                 .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.CANCELLED).event(LeadEvents.CANCEL)
                 .and().withExternal().source(LeadStates.CANCELLED).target(LeadStates.ASSIGNED).event(LeadEvents.ASSIGN)
                 .and().withExternal().source(LeadStates.CANCELLED).target(LeadStates.CANCELLED_CHOICE)
-                .event(LeadEvents.CANCEL).action(increaseFailedEngageAttemptsAction)
+                .event(LeadEvents.CANCEL).action(new IncreaseFailedEngageAttemptsAction())
                 .and().withExternal().source(LeadStates.ASSIGNED).target(LeadStates.SOLD).event(LeadEvents.SELL)
                 .and().withChoice().source(LeadStates.CANCELLED_CHOICE)
-                .first(LeadStates.DEAD, failedAttemptsGuard)
+                .first(LeadStates.DEAD, new FailedAttemptsGuard())
                 .last(LeadStates.CANCELLED);
     }
 
